@@ -609,8 +609,14 @@ runs:
               pull_number: pullRequest.number,
               per_page: 100,
             });
+            // GitHub keeps replies when their thread's first comment is deleted and promotes
+            // the first reply to a new, unresolved thread, so a comment someone answered stays.
+            const repliedToIds = new Set(
+              existing.map((comment) => comment.in_reply_to_id).filter(Boolean),
+            );
             priorCommentIds = existing
               .filter((comment) => comment.body && comment.body.startsWith(marker))
+              .filter((comment) => !repliedToIds.has(comment.id))
               .map((comment) => comment.id);
           } catch (error) {
             core.warning(`React Doctor could not list prior review comments: ${error.message}`);

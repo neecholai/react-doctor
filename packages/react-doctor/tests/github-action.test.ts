@@ -537,6 +537,16 @@ describe("GitHub Action contract", () => {
     expect(reviewStep).toContain("<!-- react-doctor:review -->");
   });
 
+  it("keeps prior review comments that have replies instead of deleting them", () => {
+    const actionYaml = readActionYaml();
+    const reviewStep = normalizeWhitespace(
+      extractStep(actionYaml, "- name: Post inline review comments"),
+    );
+
+    expect(reviewStep).toContain("comment.in_reply_to_id");
+    expect(reviewStep).toContain(".filter((comment) => !repliedToIds.has(comment.id))");
+  });
+
   it("renders and posts the sticky comment before restoring scan failure", () => {
     const actionYaml = readActionYaml();
     const renderIndex = actionYaml.indexOf("- id: render");
